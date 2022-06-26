@@ -37,13 +37,14 @@ public class AlonePlugin extends Plugin
 	@Inject
 	NotAloneOverlay overlay;
 
-	ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+	ThreadPoolExecutor executor;
 
 	private AtomicInteger players;
 	private AtomicBoolean alone;
 
 	@Override
 	protected void startUp() throws Exception {
+		executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 		players = new AtomicInteger(0);
 		alone = new AtomicBoolean(true);
 		overlayManager.add(overlay);
@@ -85,7 +86,7 @@ public class AlonePlugin extends Plugin
 	public void onPlayerDespawned(PlayerDespawned event) {
 		if (event.getPlayer().getId() == client.getLocalPlayer().getId()) return;
 		executor.execute(() -> {
-			if (players.decrementAndGet() > config.numPlayers()) {
+			if (players.get() != 0 && players.decrementAndGet() > config.numPlayers()) {
 				alone.set(false);
 			} else {
 				alone.set(true);
